@@ -84,7 +84,7 @@ export function updateLoginStateCookie (req: NextApiRequest, res: NextApiRespons
 
       // If 3 cookies exist, then we delete the oldest one to make room for the new one.
       if (!mostRecentTimestamps.includes(timestamp)) {
-        const staleCookieHeaderValue = getDeleteValueForSetCookieHeader(cookieName);
+        const staleCookieHeaderValue = getDeleteValueForLoginStateCookieHeader(cookieName);
         responseCookieArray.push(staleCookieHeaderValue);
       }
     });
