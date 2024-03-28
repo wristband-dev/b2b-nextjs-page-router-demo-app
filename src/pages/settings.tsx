@@ -1,15 +1,17 @@
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 
 import * as wristbandService from '@/services/wristband-service';
-import { useSession } from '@/context/auth-context'
-import { withSessionSsr } from '@/utils/session/with-session';
+import { useAuth } from '@/context/auth-context';
+import { getSession } from '@/utils/iron-session';
+import { Tenant } from '@/types';
+import { serverRedirectToLogin, refreshTokenIfExpired } from '@/utils/server-auth';
 
 type SettingsPageProps = {
   tenant: Tenant;
-}
+};
 
 export default function SettingsPage({ tenant }: SettingsPageProps) {
-  const { isAuthenticated, user } = useSession();
+  const { isAuthenticated, user } = useAuth();
   const { id, applicationId, vanityDomain, domainName, displayName, description, signupEnabled, status } = tenant;
 
   return (
@@ -37,25 +39,41 @@ export default function SettingsPage({ tenant }: SettingsPageProps) {
         </div>
       )}
     </section>
-  )
+  );
 }
 
-export const getServerSideProps: GetServerSideProps = withSessionSsr(
-  async function (context: GetServerSidePropsContext) {
-    const { req } = context;
-    const { session } = req;
-    const { accessToken, user } = session;
+export const getServerSideProps: GetServerSideProps = async function (context: GetServerSidePropsContext) {
+  const { req, res } = context;
+  const session = await getSession(req, res);
+  const { expiresAt, isAuthenticated, refreshToken, user } = session;
 
-    let tenant;
-    try {
-      tenant = await wristbandService.getTenant(accessToken, user.tenantId);
-    } catch (err: any) {
-      console.log(err);
-      throw err;
-    }
-  
-    return {
-      props: { tenant },
-    };
+  /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
+  if (!isAuthenticated) {
+    return serverRedirectToLogin(req);
   }
-);
+
+  /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
+  try {
+    const tokenData = await refreshTokenIfExpired(refreshToken!, expiresAt);
+    if (tokenData) {
+      session.accessToken = tokenData.accessToken;
+      // Convert the "expiresIn" seconds into an expiration date with the format of milliseconds from the epoch.
+      session.expiresAt = Date.now() + tokenData.expiresIn * 1000;
+      session.refreshToken = tokenData.refreshToken;
+    }
+  } catch (error) {
+    console.log(`Token refresh failed: `, error);
+    return serverRedirectToLogin(req);
+  }
+
+  // Save the session in order to "touch" it (even if there is no new token data).
+  await session.save();
+
+  try {
+    const tenant = await wristbandService.getTenant(session.accessToken, user.tenantId);
+    return { props: { tenant } };
+  } catch (err: unknown) {
+    console.log(err);
+    throw err;
+  }
+};

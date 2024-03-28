@@ -1,14 +1,14 @@
-import { Inter } from 'next/font/google'
-import Head from 'next/head'
+import { Inter } from 'next/font/google';
+import Head from 'next/head';
 import { ReactNode } from 'react';
 
 import Navbar from '@/components/Navbar';
 
 const inter = Inter({ subsets: ['latin'] });
- 
+
 type Props = {
-  children: ReactNode
-}
+  children: ReactNode;
+};
 
 export default function Layout({ children }: Props) {
   return (
@@ -20,9 +20,7 @@ export default function Layout({ children }: Props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Navbar />
-      <main className={`pt-16 mt-4 mx-8 ${inter.className}`}>
-        {children}
-      </main>
+      <main className={`pt-16 mt-4 mx-8 ${inter.className}`}>{children}</main>
     </>
-  )
+  );
 }
