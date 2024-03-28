@@ -17,7 +17,6 @@ const defaultOptions = {
   maxRedirects: 0,
 };
 
-
 const apiClient = axios.create(defaultOptions);
 
 apiClient.interceptors.response.use(undefined, unauthorizedAccessInterceptor);

@@ -1,4 +1,4 @@
-import { login } from '@/utils/auth';
+import { clientRedirectTologin } from '@/utils/client-auth';
 import { AxiosError } from 'axios';
 
 /**
@@ -7,7 +7,7 @@ import { AxiosError } from 'axios';
  */
 export const unauthorizedAccessInterceptor = (error: AxiosError) => {
   if (error.response && error.response.status === 401) {
-    login(window.location.href);
+    clientRedirectTologin(window.location.href);
   }
 
   return Promise.reject(error);

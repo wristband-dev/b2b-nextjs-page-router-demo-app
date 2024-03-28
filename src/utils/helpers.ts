@@ -1,9 +1,10 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiRequest, NextApiResponse } from 'next';
 import Iron from '@hapi/iron';
-import crypto from "crypto";
-import moment from "moment";
+import crypto from 'crypto';
+import moment from 'moment';
 
-import { INVOTASTIC_HOST, LOGIN_STATE_COOKIE_PREFIX } from "./constants";
+import { INVOTASTIC_HOST, LOGIN_STATE_COOKIE_PREFIX, LOGIN_STATE_COOKIE_SECRET } from './constants';
+import { Userinfo } from '@/types';
 
 function base64URLEncode(strBufferToEncode: Buffer) {
   return strBufferToEncode.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
@@ -16,52 +17,42 @@ export function calculateExpTimeWithBuffer(expiresInSeconds: number) {
   return Date.now() + expiresInMilliseconds;
 }
 
-export function createCodeChallenge (codeVerifier: string) {
+export function createCodeChallenge(codeVerifier: string) {
   return base64URLEncode(crypto.createHash('sha256').update(codeVerifier).digest());
-};
+}
 
-export function createUniqueCryptoStr () {
+export function createUniqueCryptoStr() {
   return base64URLEncode(crypto.randomBytes(32));
-};
+}
 
-export async function decryptLoginStateData (loginStateCookie: string) {
-  const unsealedLoginStateData = await Iron.unseal(loginStateCookie, process.env.LOGIN_STATE_COOKIE_SECRET!, Iron.defaults);
+export async function decryptLoginStateData(loginStateCookie: string) {
+  const unsealedLoginStateData = await Iron.unseal(loginStateCookie, LOGIN_STATE_COOKIE_SECRET!, Iron.defaults);
   return unsealedLoginStateData;
-};
+}
 
-export async function encryptLoginStateData (loginStateData: object) {
-  const sealedLoginStateData = await Iron.seal(loginStateData, process.env.LOGIN_STATE_COOKIE_SECRET!, Iron.defaults);
+export async function encryptLoginStateData(loginStateData: object) {
+  const sealedLoginStateData = await Iron.seal(loginStateData, LOGIN_STATE_COOKIE_SECRET!, Iron.defaults);
   return sealedLoginStateData;
-};
+}
 
-export function getDeleteValueForLoginStateCookieHeader (cookieName: string): string[] {
-  return [[
-    `${cookieName}=;`,
-    'Path=/;',
-    `Expires=${new Date(0).toString()};`,
-    'Max-Age=-1;',
-  ].join(' ')];
-};
+export function getDeleteValueForLoginStateCookieHeader(cookieName: string): string[] {
+  return [[`${cookieName}=;`, 'Path=/;', `Expires=${new Date(0).toString()};`, 'Max-Age=-1;'].join(' ')];
+}
 
-export function isValidDomain (host: string = '', tenantDomainName: string = '') {
+export function isValidDomain(host: string = '', tenantDomainName: string = '') {
   return host === `${tenantDomainName}.${INVOTASTIC_HOST}`;
-};
+}
 
-export function parseTenantDomainName (host: string = '') {
+export function parseTenantDomainName(host: string = '') {
   return host.substring(0, host.indexOf('.'));
-};
+}
 
-export function setNoCacheHeaders (res: NextApiResponse) {
-  res.setHeader('Cache-Control', 'no-store');
-  res.setHeader('Pragma', 'no-cache');
-};
-
-export function toQueryString (queryParams = {}) {
+export function toQueryString(queryParams = {}) {
   const params = new URLSearchParams(queryParams);
   return params.toString();
-};
+}
 
-export function updateLoginStateCookie (req: NextApiRequest, res: NextApiResponse, state: string, cookieData: string) {
+export function updateLoginStateCookie(req: NextApiRequest, res: NextApiResponse, state: string, cookieData: string) {
   // The max amount of concurrent login state cookies we allow is 3.
   const responseCookieArray = [];
   const allLoginCookieNames = Object.keys(req.cookies).filter((cookieName) => {
@@ -74,8 +65,8 @@ export function updateLoginStateCookie (req: NextApiRequest, res: NextApiRespons
       .map((cookieName: string) => {
         return cookieName.split(':')[2];
       })
-      .sort((a: any, b: any) => {
-        return b - a;
+      .sort((a: string, b: string) => {
+        return +b - +a;
       })
       .slice(0, 2);
 
@@ -103,9 +94,9 @@ export function updateLoginStateCookie (req: NextApiRequest, res: NextApiRespons
 
   responseCookieArray.push(newCookieHeaderValue);
   res.setHeader('Set-Cookie', responseCookieArray);
-};
+}
 
-export function parseUserinfo (userinfo: Userinfo) {
+export function parseUserinfo(userinfo: Userinfo) {
   return {
     id: userinfo.sub,
     tenantId: userinfo.tnt_id,
@@ -126,5 +117,5 @@ export function parseUserinfo (userinfo: Userinfo) {
     locale: userinfo.locale,
     updatedAt: userinfo.updated_at,
     roles: userinfo.roles,
-  }
-};
+  };
+}
