@@ -1,5 +1,5 @@
 import apiClient from '@/client/server-axios-client';
-import { bearerToken } from '@/utils/server-auth';
+import { bearerToken } from '@/auth/server-auth';
 
 // Basic Auth Config for fetch()
 const BASIC_AUTH_CREDENTIALS = `${process.env.CLIENT_ID!}:${process.env.CLIENT_SECRET!}`;

@@ -10,7 +10,7 @@ import {
   INVOTASTIC_HOST,
   IS_LOCALHOST,
   LOGIN_STATE_COOKIE_PREFIX,
-} from './constants';
+} from '../utils/constants';
 import {
   createCodeChallenge,
   createUniqueCryptoStr,
@@ -21,7 +21,7 @@ import {
   parseTenantDomainName,
   toQueryString,
   updateLoginStateCookie,
-} from './helpers';
+} from '../utils/helpers';
 
 export function bearerToken(accessToken: string) {
   return { headers: { Authorization: `Bearer ${accessToken}` } };

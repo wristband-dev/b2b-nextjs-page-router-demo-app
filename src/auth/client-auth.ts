@@ -1,3 +1,8 @@
+/*
+ * These are auth functions that can be invoked to redirect to Wristband for logging in and logging out
+ * of the application.
+ */
+
 export function clientRedirectTologin(returnUrl?: string) {
   if (!!window) {
     if (returnUrl) {

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
 
 import Logo from '../../public/Logo.png';
-import { clientRedirectToLogout } from '@/utils/client-auth';
+import { clientRedirectToLogout } from '@/auth/client-auth';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);

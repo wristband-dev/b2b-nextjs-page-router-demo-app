@@ -1,4 +1,4 @@
-import { clientRedirectTologin } from '@/utils/client-auth';
+import { clientRedirectTologin } from '@/auth/client-auth';
 import { AxiosError } from 'axios';
 
 /**

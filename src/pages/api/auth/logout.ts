@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { getSession } from '@/utils/iron-session';
+import { getSession } from '@/session/iron-session';
 import { SESSION_COOKIE_NAME } from '@/utils/constants';
 import { logout } from '@/utils/server-auth';
 
