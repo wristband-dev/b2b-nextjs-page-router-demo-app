@@ -5,7 +5,7 @@ import * as crypto from 'uncrypto';
 import moment from 'moment';
 
 import { INVOTASTIC_HOST, LOGIN_STATE_COOKIE_PREFIX, LOGIN_STATE_COOKIE_SECRET } from './constants';
-import { Userinfo } from '@/types';
+import { LoginState, Userinfo } from '@/types';
 
 function base64URLEncode(strBufferToEncode: Buffer) {
   return strBufferToEncode.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
@@ -27,12 +27,14 @@ export function createUniqueCryptoStr() {
 }
 
 export async function decryptLoginStateData(loginStateCookie: string) {
-  const unsealedLoginStateData = await unseal(crypto, loginStateCookie, LOGIN_STATE_COOKIE_SECRET!, defaults);
+  const unsealedLoginStateData: LoginState = <LoginState>(
+    await unseal(crypto, loginStateCookie, LOGIN_STATE_COOKIE_SECRET!, defaults)
+  );
   return unsealedLoginStateData;
 }
 
 export async function encryptLoginStateData(loginStateData: object) {
-  const sealedLoginStateData = await seal(crypto, loginStateData, LOGIN_STATE_COOKIE_SECRET!, defaults);
+  const sealedLoginStateData: string = await seal(crypto, loginStateData, LOGIN_STATE_COOKIE_SECRET!, defaults);
   return sealedLoginStateData;
 }
 

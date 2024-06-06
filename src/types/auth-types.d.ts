@@ -1,4 +1,23 @@
 /**
+ * Represents all possible state for the current login request, which is stored in the login state cookie.
+ * @typedef {Object} LoginState
+ * @property {string} codeVerifier - The code verifier for PKCE.
+ * @property {Object.<string, any>} [customState] - Custom state data for the login state.
+ * @property {string} redirectUri - The redirect URI for callback after authentication.
+ * @property {string} [returnUrl] - The URL to return to after authentication.
+ * @property {string} state - The state of the login process.
+ * @property {string} [tenantDomainName] - The domain name of the tenant the user belongs to.
+ */
+export type LoginState = {
+  codeVerifier: string;
+  customState?: { [key: string]: unknown };
+  redirectUri: string;
+  returnUrl?: string;
+  state: string;
+  tenantDomainName?: string;
+};
+
+/**
  * Represents the callback data received after authentication.
  * @typedef {TokenData} CallbackData
  * @property {Object.<string, any>} [customState] - Custom state data received in the callback.

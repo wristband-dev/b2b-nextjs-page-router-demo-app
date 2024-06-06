@@ -21,7 +21,7 @@ const defaultOptions = {
     timeout: 60000,
     freeSocketTimeout: 30000,
   }),
-  httpsAgent: new HttpsAgent({ rejectUnauthorized: false }),
+  httpsAgent: new HttpsAgent({ rejectUnauthorized: true }),
   headers: { 'Content-Type': JSON_MEDIA_TYPE, Accept: JSON_MEDIA_TYPE },
   maxRedirects: 0,
 };

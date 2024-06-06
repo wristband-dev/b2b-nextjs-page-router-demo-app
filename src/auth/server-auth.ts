@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { IncomingMessage } from 'http';
 
-import { CallbackData, LogoutConfig } from '@/types';
+import { CallbackData, LoginState, LogoutConfig } from '@/types';
 import * as authService from '@/services/auth-service';
 import {
   APPLICATION_LOGIN_URL,
@@ -109,7 +109,7 @@ export async function callback(req: NextApiRequest, res: NextApiResponse): Promi
   // Delete the login state cookie.
   res.setHeader('Set-Cookie', getDeleteValueForLoginStateCookieHeader(cookieName));
 
-  const unsealedLoginStateData = await decryptLoginStateData(loginStateCookie);
+  const unsealedLoginStateData: LoginState = await decryptLoginStateData(loginStateCookie);
   const { codeVerifier, returnUrl, state: cookieState, tenantDomainName } = unsealedLoginStateData;
   // Tenant domain is only used for vanity domain URL format
   const tenantDomain = IS_LOCALHOST ? '' : `${tenantDomainName}.`;
@@ -157,7 +157,7 @@ export async function callback(req: NextApiRequest, res: NextApiResponse): Promi
     idToken,
     ...(!!refreshToken && { refreshToken }),
     ...(!!returnUrl && { returnUrl }),
-    tenantDomainName,
+    tenantDomainName: tenantDomainName!,
     userinfo,
   };
 }
