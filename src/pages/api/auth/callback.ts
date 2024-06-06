@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { getSession } from '@/utils/iron-session';
+import { getSession } from '@/session/iron-session';
 import { parseUserinfo } from '@/utils/helpers';
 import { INVOTASTIC_HOST, IS_LOCALHOST } from '@/utils/constants';
-import { callback } from '@/utils/server-auth';
+import { callback } from '@/auth/server-auth';
 
 export default async function handleCallback(req: NextApiRequest, res: NextApiResponse) {
   try {

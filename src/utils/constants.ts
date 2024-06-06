@@ -9,4 +9,5 @@ export const LOGIN_STATE_COOKIE_SECRET = '7ffdbecc-ab7d-4134-9307-2dfcc52f7475';
 export const SESSION_COOKIE_NAME = 'sid';
 export const SESSION_COOKIE_SECRET = '96bf13d5-b5c1-463a-812c-0d8db87c0ec5';
 
+export const FORM_URLENCOED_MEDIA_TYPE = 'application/x-www-form-urlencoded';
 export const JSON_MEDIA_TYPE = 'application/json;charset=UTF-8';

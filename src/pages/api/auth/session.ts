@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/utils/iron-session';
+import { getSession } from '@/session/iron-session';
 
 export default async function sessionRoute(req: NextApiRequest, res: NextApiResponse) {
   const session = await getSession(req, res);

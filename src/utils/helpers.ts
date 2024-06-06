@@ -1,10 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import Iron from '@hapi/iron';
-import crypto from 'crypto';
+import { createHash, randomBytes } from 'crypto';
+import { defaults, seal, unseal } from 'iron-webcrypto';
+import * as crypto from 'uncrypto';
 import moment from 'moment';
 
 import { INVOTASTIC_HOST, LOGIN_STATE_COOKIE_PREFIX, LOGIN_STATE_COOKIE_SECRET } from './constants';
-import { Userinfo } from '@/types';
+import { LoginState, Userinfo } from '@/types';
 
 function base64URLEncode(strBufferToEncode: Buffer) {
   return strBufferToEncode.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
@@ -18,20 +19,22 @@ export function calculateExpTimeWithBuffer(expiresInSeconds: number) {
 }
 
 export function createCodeChallenge(codeVerifier: string) {
-  return base64URLEncode(crypto.createHash('sha256').update(codeVerifier).digest());
+  return base64URLEncode(createHash('sha256').update(codeVerifier).digest());
 }
 
 export function createUniqueCryptoStr() {
-  return base64URLEncode(crypto.randomBytes(32));
+  return base64URLEncode(randomBytes(32));
 }
 
 export async function decryptLoginStateData(loginStateCookie: string) {
-  const unsealedLoginStateData = await Iron.unseal(loginStateCookie, LOGIN_STATE_COOKIE_SECRET!, Iron.defaults);
+  const unsealedLoginStateData: LoginState = <LoginState>(
+    await unseal(crypto, loginStateCookie, LOGIN_STATE_COOKIE_SECRET!, defaults)
+  );
   return unsealedLoginStateData;
 }
 
 export async function encryptLoginStateData(loginStateData: object) {
-  const sealedLoginStateData = await Iron.seal(loginStateData, LOGIN_STATE_COOKIE_SECRET!, Iron.defaults);
+  const sealedLoginStateData: string = await seal(crypto, loginStateData, LOGIN_STATE_COOKIE_SECRET!, defaults);
   return sealedLoginStateData;
 }
 

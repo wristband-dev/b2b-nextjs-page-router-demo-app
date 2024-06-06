@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
 
-import { clientRedirectTologin, clientRedirectToLogout } from '@/utils/client-auth';
+import { clientRedirectTologin, clientRedirectToLogout } from '@/auth/client-auth';
 import { apiClient as axios } from '@/client/browser-axios-client';
 import { User } from '@/types';
 

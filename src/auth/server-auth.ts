@@ -1,16 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import retry from 'async-retry';
 import { IncomingMessage } from 'http';
 
-import { CallbackData, LogoutConfig, TokenData, TokenResponse } from '@/types';
-import * as wristbandService from '@/services/wristband-service';
+import { CallbackData, LoginState, LogoutConfig } from '@/types';
+import * as authService from '@/services/auth-service';
 import {
   APPLICATION_LOGIN_URL,
   AUTH_CALLBACK_URL,
   INVOTASTIC_HOST,
   IS_LOCALHOST,
   LOGIN_STATE_COOKIE_PREFIX,
-} from './constants';
+} from '../utils/constants';
 import {
   createCodeChallenge,
   createUniqueCryptoStr,
@@ -21,11 +20,7 @@ import {
   parseTenantDomainName,
   toQueryString,
   updateLoginStateCookie,
-} from './helpers';
-
-export function bearerToken(accessToken: string) {
-  return { headers: { Authorization: `Bearer ${accessToken}` } };
-}
+} from '../utils/helpers';
 
 /* ****************/
 /* SDK CANDIDATES */
@@ -114,7 +109,7 @@ export async function callback(req: NextApiRequest, res: NextApiResponse): Promi
   // Delete the login state cookie.
   res.setHeader('Set-Cookie', getDeleteValueForLoginStateCookieHeader(cookieName));
 
-  const unsealedLoginStateData = await decryptLoginStateData(loginStateCookie);
+  const unsealedLoginStateData: LoginState = await decryptLoginStateData(loginStateCookie);
   const { codeVerifier, returnUrl, state: cookieState, tenantDomainName } = unsealedLoginStateData;
   // Tenant domain is only used for vanity domain URL format
   const tenantDomain = IS_LOCALHOST ? '' : `${tenantDomainName}.`;
@@ -144,7 +139,7 @@ export async function callback(req: NextApiRequest, res: NextApiResponse): Promi
 
   /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
   // Now exchange the auth code for a new access token.
-  const tokenData = await wristbandService.exchangeAuthCodeForTokens(code, AUTH_CALLBACK_URL, codeVerifier);
+  const tokenData = await authService.exchangeAuthCodeForTokens(code, AUTH_CALLBACK_URL, codeVerifier);
   const {
     access_token: accessToken,
     expires_in: expiresIn,
@@ -154,7 +149,7 @@ export async function callback(req: NextApiRequest, res: NextApiResponse): Promi
 
   /* WRISTBAND_TOUCHPOINT - RESOURCE API */
   // Get a minimal set of the user's data to store in their session data.
-  const userinfo = await wristbandService.getUserinfo(accessToken);
+  const userinfo = await authService.getUserinfo(accessToken);
 
   return {
     accessToken,
@@ -162,7 +157,7 @@ export async function callback(req: NextApiRequest, res: NextApiResponse): Promi
     idToken,
     ...(!!refreshToken && { refreshToken }),
     ...(!!returnUrl && { returnUrl }),
-    tenantDomainName,
+    tenantDomainName: tenantDomainName!,
     userinfo,
   };
 }
@@ -177,8 +172,9 @@ export async function logout(req: NextApiRequest, res: NextApiResponse, config: 
   if (config.refreshToken) {
     try {
       /* WRISTBAND_TOUCHPOINT - RESOURCE API */
-      await wristbandService.revokeRefreshToken(config.refreshToken);
+      await authService.revokeRefreshToken(config.refreshToken);
     } catch (error) {
+      console.log(error);
       // No need to block logout execution if revoking fails
       console.debug(`Revoking the refresh token failed during logout`);
     }
@@ -203,41 +199,5 @@ export async function logout(req: NextApiRequest, res: NextApiResponse, config: 
 
   /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
   // Always perform logout redirect to the Wristband logout endpoint.
-  res.redirect(`http://${hostname}/api/v1/logout?${query}`);
-}
-
-export async function refreshTokenIfExpired(refreshToken: string, expiresAt: number): Promise<TokenData | null> {
-  // Safety checks
-  if (!refreshToken) {
-    throw new TypeError('Refresh token must be a valid string');
-  }
-  if (!expiresAt || expiresAt < 0) {
-    throw new TypeError('The expiresAt field must be an integer greater than 0');
-  }
-
-  if (Date.now().valueOf() < expiresAt) {
-    return null;
-  }
-
-  // Try up to 3 times to perform a token refresh.
-  let tokenResponse: TokenResponse | null = null;
-  await retry(
-    async () => {
-      tokenResponse = await wristbandService.refreshToken(refreshToken);
-    },
-    { retries: 2, minTimeout: 100, maxTimeout: 100 }
-  );
-
-  if (tokenResponse) {
-    const {
-      access_token: accessToken,
-      id_token: idToken,
-      expires_in: expiresIn,
-      refresh_token: responseRefreshToken,
-    } = tokenResponse;
-    return { accessToken, idToken, refreshToken: responseRefreshToken, expiresIn };
-  }
-
-  // [Safety check] Errors during the refresh API call should bubble up, so this should never happen.
-  throw new Error('Token response was null');
+  res.redirect(`https://${hostname}/api/v1/logout?${query}`);
 }
