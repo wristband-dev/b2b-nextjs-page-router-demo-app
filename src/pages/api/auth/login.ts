@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { login } from '@/utils/server-auth';
+import { login } from '@/auth/server-auth';
 
 export default async function handleLogin(req: NextApiRequest, res: NextApiResponse) {
   try {

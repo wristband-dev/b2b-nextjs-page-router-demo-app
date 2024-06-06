@@ -1,9 +1,18 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import Agent from 'agentkeepalive';
 const HttpsAgent = Agent.HttpsAgent;
 
-import { unauthorizedAccessInterceptor } from './unauthorized-access-interceptor';
+import { clientRedirectTologin } from '@/auth/client-auth';
 import { JSON_MEDIA_TYPE } from '@/utils/constants';
+
+// This interceptor redirect to the /login route when a 401 Unauthorized HTTP status is returned.
+function unauthorizedAccessInterceptor(error: AxiosError) {
+  if (error.response && error.response.status === 401) {
+    clientRedirectTologin(window.location.href);
+  }
+
+  return Promise.reject(error);
+}
 
 const defaultOptions = {
   httpAgent: new Agent({
@@ -12,13 +21,12 @@ const defaultOptions = {
     timeout: 60000,
     freeSocketTimeout: 30000,
   }),
-  httpsAgent: new HttpsAgent({ rejectUnauthorized: !process.env.NEXT_PUBLIC_TRUST_SELF_SIGNED_CERT }),
+  httpsAgent: new HttpsAgent({ rejectUnauthorized: false }),
   headers: { 'Content-Type': JSON_MEDIA_TYPE, Accept: JSON_MEDIA_TYPE },
   maxRedirects: 0,
 };
 
 const apiClient = axios.create(defaultOptions);
-
 apiClient.interceptors.response.use(undefined, unauthorizedAccessInterceptor);
 
 export { apiClient };

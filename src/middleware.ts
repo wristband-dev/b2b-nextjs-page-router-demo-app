@@ -7,20 +7,18 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const { nextUrl, headers } = req;
   const { pathname } = nextUrl;
-  // The boolean logic here should change depending on your SSR page convention.
-  const isSsrPage: boolean = pathname === '/settings';
 
   // This determines which routes in your app are protected by tokens and have session access.
   // Path matching here is crude -- replace with whatever matching algorithm your app needs.
+  const isSsrPage: boolean = pathname === '/settings';
   if (!pathname.startsWith('/api/v1') && !isSsrPage) {
     return res;
   }
 
-  const session = await getSession(req, res);
-  const { accessToken, expiresAt, refreshToken } = session;
-
   // For browser-side React calls to API routes, React should handle a 401 response by redirecting
   // to the login page. For SSR pages, the redirect needs to happen directly here in the middleware.
+  const session = await getSession(req, res);
+  const { accessToken, expiresAt, refreshToken } = session;
   const isAuthenticated = !!accessToken && !!expiresAt && !!refreshToken;
   if (!isAuthenticated) {
     const returnUrl = `http://${headers.get('host')}${pathname}`;
@@ -29,12 +27,10 @@ export async function middleware(req: NextRequest) {
       : NextResponse.json({ statusText: 'Unauthorized' }, { status: 401 });
   }
 
-  // Attempt to refresh the token up to 3 times before returning a 401.
   /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
   try {
     const tokenData = await refreshTokenIfExpired(refreshToken!, expiresAt);
     if (tokenData) {
-      console.log('MIDDLEWARE VALUES: ', expiresAt, tokenData.expiresIn);
       session.accessToken = tokenData.accessToken;
       // Convert the "expiresIn" seconds into an expiration date with the format of milliseconds from the epoch.
       session.expiresAt = Date.now() + tokenData.expiresIn * 1000;

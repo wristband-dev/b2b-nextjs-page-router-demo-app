@@ -10,14 +10,9 @@ const BASIC_AUTH_FETCH_HEADERS = {
   Authorization: BASIC_AUTH_HEADER_VALUE,
 };
 
-/* NOTE: We must use fetch() here instead of axios() as NextJS middleware combined with Iron Session
- * prevents us from leveraging any NodeJS libs that axios relies on under the hood.
- */
+// NOTE: We must use fetch() here instead of axios() due to NextJS's edge runtime limitations.
 async function performTokenRefresh(refreshToken: string) {
-  // This condition is here for local development when the Wristband platform is also local.  This
-  // will never be the case in production.
-  const protocol = process.env.NEXT_PUBLIC_TRUST_SELF_SIGNED_CERT ? 'http' : 'https';
-  const res = await fetch(`${protocol}://${process.env.APPLICATION_DOMAIN}/api/v1/oauth2/token`, {
+  const res = await fetch(`http://${process.env.APPLICATION_DOMAIN}/api/v1/oauth2/token`, {
     method: 'POST',
     headers: BASIC_AUTH_FETCH_HEADERS,
     body: `grant_type=refresh_token&refresh_token=${refreshToken}`,
@@ -41,7 +36,7 @@ export async function refreshTokenIfExpired(refreshToken: string, expiresAt: num
     throw new TypeError('The expiresAt field must be an integer greater than 0');
   }
 
-  if (Date.now().valueOf() > expiresAt) {
+  if (Date.now().valueOf() <= expiresAt) {
     return null;
   }
 
