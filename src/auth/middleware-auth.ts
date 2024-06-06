@@ -12,7 +12,7 @@ const BASIC_AUTH_FETCH_HEADERS = {
 
 // NOTE: We must use fetch() here instead of axios() due to NextJS's edge runtime limitations.
 async function performTokenRefresh(refreshToken: string) {
-  const res = await fetch(`http://${process.env.APPLICATION_DOMAIN}/api/v1/oauth2/token`, {
+  const res = await fetch(`https://${process.env.APPLICATION_DOMAIN}/api/v1/oauth2/token`, {
     method: 'POST',
     headers: BASIC_AUTH_FETCH_HEADERS,
     body: `grant_type=refresh_token&refresh_token=${refreshToken}`,
