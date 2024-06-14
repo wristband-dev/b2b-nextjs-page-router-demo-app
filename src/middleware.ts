@@ -23,7 +23,6 @@ export async function middleware(req: NextRequest) {
 
   // Send users to the login page if they attempt to access protected paths when unauthenticated.
   if (!isAuthenticated && (isProtectedPage || isProtectedApiRoute)) {
-    console.log('NOT AUTH!!!!');
     return isProtectedApiRoute ? NextResponse.json(UNAUTHORIZED, HTTP_401_STATUS) : NextResponse.redirect(loginUrl);
   }
 
@@ -32,7 +31,6 @@ export async function middleware(req: NextRequest) {
     try {
       /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
       const tokenData = await refreshTokenIfExpired(refreshToken!, expiresAt);
-      console.log('REFRESH TOKEN DATA: ', tokenData);
       if (tokenData) {
         // Convert the "expiresIn" seconds into an expiration date with the format of milliseconds from the epoch.
         session.expiresAt = Date.now() + tokenData.expiresIn * 1000;
