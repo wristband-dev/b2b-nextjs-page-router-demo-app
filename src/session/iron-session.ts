@@ -21,8 +21,8 @@ const sessionOptions: SessionOptions = {
     maxAge: 1800,
     path: '/',
     sameSite: 'lax',
-    // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
-    secure: process.env.NODE_ENV === 'production',
+    // NOTE: If deploying your own app to production, do not disable secure cookies.
+    secure: false,
   },
 };
 

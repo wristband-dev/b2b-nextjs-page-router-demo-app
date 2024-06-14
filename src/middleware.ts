@@ -3,50 +3,51 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/session/iron-session';
 import { refreshTokenIfExpired } from './auth/middleware-auth';
 
+const HTTP_401_STATUS = { status: 401 };
+const UNAUTHORIZED = { statusText: 'Unauthorized' };
+
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-  const { nextUrl, headers } = req;
+  const { headers, nextUrl } = req;
+  const host = headers.get('host');
   const { pathname } = nextUrl;
+  const returnUrl = `http://${host}${pathname}`;
+  const loginUrl = `http://${host}/api/auth/login?return_url=${returnUrl}`;
 
-  // This determines which routes in your app are protected by tokens and have session access.
   // Path matching here is crude -- replace with whatever matching algorithm your app needs.
-  const isSsrPage: boolean = pathname === '/settings';
-  if (!pathname.startsWith('/api/v1') && !isSsrPage) {
-    return res;
-  }
+  const isProtectedPage: boolean = pathname === '/settings';
+  const isProtectedApiRoute: boolean = pathname.startsWith('/api/v1');
 
-  // For browser-side React calls to API routes, React should handle a 401 response by redirecting
-  // to the login page. For SSR pages, the redirect needs to happen directly here in the middleware.
   const session = await getSession(req, res);
-  const { accessToken, expiresAt, refreshToken } = session;
-  const isAuthenticated = !!accessToken && !!expiresAt && !!refreshToken;
-  if (!isAuthenticated) {
-    const returnUrl = `http://${headers.get('host')}${pathname}`;
-    return isSsrPage
-      ? NextResponse.redirect(`http://${headers.get('host')}/api/auth/login?return_url=${returnUrl}`)
-      : NextResponse.json({ statusText: 'Unauthorized' }, { status: 401 });
+  const { expiresAt, isAuthenticated, refreshToken } = session;
+
+  // Send users to the login page if they attempt to access protected paths when unauthenticated.
+  if (!isAuthenticated && (isProtectedPage || isProtectedApiRoute)) {
+    console.log('NOT AUTH!!!!');
+    return isProtectedApiRoute ? NextResponse.json(UNAUTHORIZED, HTTP_401_STATUS) : NextResponse.redirect(loginUrl);
   }
 
-  /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
-  try {
-    const tokenData = await refreshTokenIfExpired(refreshToken!, expiresAt);
-    if (tokenData) {
-      session.accessToken = tokenData.accessToken;
-      // Convert the "expiresIn" seconds into an expiration date with the format of milliseconds from the epoch.
-      session.expiresAt = Date.now() + tokenData.expiresIn * 1000;
-      session.refreshToken = tokenData.refreshToken;
+  // Always verify the refresh token is not expired and touch the session timestamp for any protected paths.
+  if (isAuthenticated && (isProtectedPage || isProtectedApiRoute)) {
+    try {
+      /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
+      const tokenData = await refreshTokenIfExpired(refreshToken!, expiresAt);
+      console.log('REFRESH TOKEN DATA: ', tokenData);
+      if (tokenData) {
+        // Convert the "expiresIn" seconds into an expiration date with the format of milliseconds from the epoch.
+        session.expiresAt = Date.now() + tokenData.expiresIn * 1000;
+        session.accessToken = tokenData.accessToken;
+        session.refreshToken = tokenData.refreshToken;
+      }
+      // Save and/or touch the session.
+      await session.save();
+    } catch (error) {
+      console.log(`Token refresh failed: `, error);
+      return isProtectedApiRoute ? NextResponse.json(UNAUTHORIZED, HTTP_401_STATUS) : NextResponse.redirect(loginUrl);
     }
-
-    // Save the session in order to "touch" it (even if there is no new token data).
-    await session.save();
-    return res;
-  } catch (error) {
-    console.log(`Token refresh failed: `, error);
-    const returnUrl = `http://${headers.get('host')}${pathname}`;
-    return isSsrPage
-      ? NextResponse.redirect(`http://${headers.get('host')}/api/auth/login?return_url=${returnUrl}`)
-      : NextResponse.json({ statusText: 'Unauthorized' }, { status: 401 });
   }
+
+  return res;
 }
 
 export const config = {

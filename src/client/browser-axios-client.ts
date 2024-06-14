@@ -21,7 +21,8 @@ const defaultOptions = {
     timeout: 60000,
     freeSocketTimeout: 30000,
   }),
-  httpsAgent: new HttpsAgent({ rejectUnauthorized: true }),
+  // NOTE: If deploying your own app to production (and using Axios), do not set rejectUnauthorized to false.
+  httpsAgent: new HttpsAgent({ rejectUnauthorized: false }),
   headers: { 'Content-Type': JSON_MEDIA_TYPE, Accept: JSON_MEDIA_TYPE },
   maxRedirects: 0,
 };
