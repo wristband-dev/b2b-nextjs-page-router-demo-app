@@ -44,7 +44,7 @@ export async function login(req: NextApiRequest, res: NextApiResponse, config: L
 
   // Make sure a valid tenantDomainName exists for multi-tenant apps.
   let tenantDomainName: string = '';
-  tenantDomainName = resolveTenantDomain(req, process.env.DOMAIN_FORMAT === 'VANITY_DOMAIN', INVOTASTIC_HOST);
+  tenantDomainName = resolveTenantDomain(req, !IS_LOCALHOST, INVOTASTIC_HOST);
   if (!tenantDomainName) {
     res.redirect(APPLICATION_LOGIN_URL);
     return;
