@@ -45,9 +45,11 @@ export default function SettingsPage({ tenant }: SettingsPageProps) {
 export const getServerSideProps: GetServerSideProps = async function (context: GetServerSidePropsContext) {
   const { req, res } = context;
   const session = await getSession(req, res);
-  const { isAuthenticated, user } = session;
 
   /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
+  // NOTE: This check is not necessary here since our Middleware logic already checks this. This is just
+  // for demonstrating how one could directly access the session data and perform auth checks during SSR.
+  const { isAuthenticated, user } = session;
   if (!isAuthenticated) {
     return serverRedirectToLogin(req);
   }

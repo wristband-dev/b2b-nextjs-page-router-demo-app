@@ -20,7 +20,9 @@ export default function Layout({ children }: Props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Navbar />
-      <main className={`pt-16 mt-4 mx-8 ${inter.className}`}>{children}</main>
+      <main className={`flex flex-col items-center justify-center mt-6 mx-8 pt-16 text-center ${inter.className}"`}>
+        {children}
+      </main>
     </>
   );
 }

@@ -1,4 +1,13 @@
 /**
+ * Represents the configuration for login.
+ * @typedef {Object} LoginConfig
+ * @property {Object.<string, unknown>} [customState] - Custom state data for the login request.
+ */
+export type LoginConfig = {
+  customState?: { [key: string]: unknown };
+};
+
+/**
  * Represents all possible state for the current login request, which is stored in the login state cookie.
  * @typedef {Object} LoginState
  * @property {string} codeVerifier - The code verifier for PKCE.
@@ -14,6 +23,17 @@ export type LoginState = {
   redirectUri: string;
   returnUrl?: string;
   state: string;
+  tenantDomainName?: string;
+};
+
+/**
+ * Represents the configuration for the map which is stored in login state cookie.
+ * @typedef {Object} LoginStateMapConfig
+ * @property {Object.<string, unknown>} [customState] - Custom state data for the login state map.
+ * @property {string} [tenantDomainName] - The domain name of the tenant the user belongs to.
+ */
+export type LoginStateMapConfig = {
+  customState?: { [key: string]: unknown };
   tenantDomainName?: string;
 };
 

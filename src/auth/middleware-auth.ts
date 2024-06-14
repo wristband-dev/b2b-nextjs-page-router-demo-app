@@ -10,7 +10,7 @@ const BASIC_AUTH_FETCH_HEADERS = {
   Authorization: BASIC_AUTH_HEADER_VALUE,
 };
 
-// NOTE: We must use fetch() here instead of axios() due to NextJS's edge runtime limitations.
+// NOTE: We must use fetch() in the Middleware here instead of axios() due to NextJS's edge runtime limitations.
 async function performTokenRefresh(refreshToken: string) {
   const res = await fetch(`https://${process.env.APPLICATION_DOMAIN}/api/v1/oauth2/token`, {
     method: 'POST',

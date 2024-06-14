@@ -11,25 +11,25 @@ export default async function handleCallback(req: NextApiRequest, res: NextApiRe
     // After the user authenticates, exchange the incoming authorization code for JWTs and also retrieve userinfo.
     const callbackData = await callback(req, res);
 
-    if (!callbackData) {
-      return;
+    // If the SDK does not need to return a redirect response, then we can save any necessary fields for the user's app
+    // session into a session cookie.
+    if (callbackData) {
+      // Save any necessary fields for the user's app session into a session cookie.
+      const session = await getSession(req, res);
+      session.isAuthenticated = true;
+      session.accessToken = callbackData.accessToken;
+      // Convert the "expiresIn" seconds into an expiration date with the format of milliseconds from the epoch.
+      session.expiresAt = Date.now() + callbackData.expiresIn * 1000;
+      session.refreshToken = callbackData.refreshToken;
+      session.user = parseUserinfo(callbackData.userinfo);
+      session.tenantDomainName = callbackData.tenantDomainName;
+
+      await session.save();
+
+      // Send the user back to the Invotastic application.
+      const tenantDomain = IS_LOCALHOST ? '' : `${callbackData.tenantDomainName}.`;
+      res.redirect(callbackData.returnUrl || `http://${tenantDomain}${INVOTASTIC_HOST}`);
     }
-
-    // Save any necessary fields for the user's app session into a session cookie.
-    const session = await getSession(req, res);
-    session.isAuthenticated = true;
-    session.accessToken = callbackData.accessToken;
-    // Convert the "expiresIn" seconds into an expiration date with the format of milliseconds from the epoch.
-    session.expiresAt = Date.now() + callbackData.expiresIn * 1000;
-    session.refreshToken = callbackData.refreshToken;
-    session.user = parseUserinfo(callbackData.userinfo);
-    session.tenantDomainName = callbackData.tenantDomainName;
-
-    await session.save();
-
-    // Send the user back to the Invotastic application.
-    const tenantDomain = IS_LOCALHOST ? '' : `${callbackData.tenantDomainName}.`;
-    res.redirect(callbackData.returnUrl || `http://${tenantDomain}${INVOTASTIC_HOST}`);
   } catch (error: unknown) {
     console.error(error);
   }
