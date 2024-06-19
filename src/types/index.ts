@@ -1,2 +1,2 @@
-export * from './auth-types';
-export * from './wristband-types';
+export * from './auth-types.d';
+export * from './wristband-types.d';

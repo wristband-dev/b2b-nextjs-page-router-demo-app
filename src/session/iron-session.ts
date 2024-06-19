@@ -26,6 +26,13 @@ const sessionOptions: SessionOptions = {
   },
 };
 
+export function middlewareGetSession(
+  req: http.IncomingMessage | Request,
+  res: http.ServerResponse | Response
+): Promise<IronSession<SessionData>> {
+  return getSession(req, res);
+}
+
 export function getSession(
   req: http.IncomingMessage | Request,
   res: http.ServerResponse | Response

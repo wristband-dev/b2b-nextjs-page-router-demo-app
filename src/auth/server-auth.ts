@@ -1,7 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { IncomingMessage } from 'http';
 
-import { CallbackData, LoginConfig, LoginState, LogoutConfig, TokenResponse, Userinfo } from '@/types';
+import {
+  CallbackData,
+  CallbackResult,
+  CallbackResultType,
+  LoginConfig,
+  LoginState,
+  LogoutConfig,
+  TokenResponse,
+  Userinfo,
+} from '@/types';
 import * as authService from '@/services/auth-service';
 import {
   APPLICATION_LOGIN_URL,
@@ -75,7 +84,7 @@ export async function login(req: NextApiRequest, res: NextApiResponse, config: L
   return;
 }
 
-export async function callback(req: NextApiRequest, res: NextApiResponse): Promise<CallbackData | void> {
+export async function callback(req: NextApiRequest, res: NextApiResponse): Promise<CallbackResult> {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Pragma', 'no-cache');
 
@@ -103,8 +112,7 @@ export async function callback(req: NextApiRequest, res: NextApiResponse): Promi
   const loginStateCookie: string = getAndClearLoginStateCookie(req, res);
   if (!loginStateCookie) {
     console.warn(`Login state cookie not found. Redirecting to login.`);
-    res.redirect(tenantLoginUrl || appLoginUrl);
-    return;
+    return { redirectUrl: tenantLoginUrl || appLoginUrl, result: CallbackResultType.REDIRECT_REQUIRED };
   }
 
   const loginState: LoginState = await decryptLoginState(loginStateCookie, LOGIN_STATE_COOKIE_SECRET);
@@ -112,12 +120,13 @@ export async function callback(req: NextApiRequest, res: NextApiResponse): Promi
 
   // Ensure there is a proper tenantDomain
   if (IS_LOCALHOST && !tenantDomainName) {
-    res.redirect(appLoginUrl);
-    return;
+    return { redirectUrl: appLoginUrl, result: CallbackResultType.REDIRECT_REQUIRED };
   }
   if (!IS_LOCALHOST && tenantSubdomain !== tenantDomainName) {
-    res.redirect(`http://${tenantDomainName}.${INVOTASTIC_HOST}/api/auth/login`);
-    return;
+    return {
+      redirectUrl: `http://${tenantDomainName}.${INVOTASTIC_HOST}/api/auth/login`,
+      result: CallbackResultType.REDIRECT_REQUIRED,
+    };
   }
 
   tenantLoginUrl = !IS_LOCALHOST
@@ -126,13 +135,11 @@ export async function callback(req: NextApiRequest, res: NextApiResponse): Promi
 
   // Check for any potential error conditions
   if (paramState !== cookieState) {
-    res.redirect(tenantLoginUrl);
-    return;
+    return { redirectUrl: tenantLoginUrl, result: CallbackResultType.REDIRECT_REQUIRED };
   }
   if (error) {
     if (error.toLowerCase() === LOGIN_REQUIRED_ERROR) {
-      res.redirect(tenantLoginUrl);
-      return;
+      return { redirectUrl: tenantLoginUrl, result: CallbackResultType.REDIRECT_REQUIRED };
     }
     throw new WristbandError(error, errorDescription);
   }
@@ -158,8 +165,7 @@ export async function callback(req: NextApiRequest, res: NextApiResponse): Promi
   // Get a minimal set of the user's data to store in their session data.
   // Fetch the userinfo for the user logging in.
   const userinfo: Userinfo = await authService.getUserinfo(accessToken);
-
-  return {
+  const callbackData: CallbackData = {
     accessToken,
     ...(!!customState && { customState }),
     expiresIn,
@@ -169,6 +175,7 @@ export async function callback(req: NextApiRequest, res: NextApiResponse): Promi
     tenantDomainName: tenantDomainName!,
     userinfo,
   };
+  return { callbackData, result: CallbackResultType.COMPLETED };
 }
 
 export async function logout(req: NextApiRequest, res: NextApiResponse, config: LogoutConfig = {}): Promise<void> {

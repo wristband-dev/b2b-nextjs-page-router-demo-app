@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
   if (!isAuthenticated) {
-    return res.status(401).end('Unauthorized');
+    return res.status(401).end();
   }
 
   return res.status(200).json({ message: 'Hello World!' });
