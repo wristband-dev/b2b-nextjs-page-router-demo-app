@@ -21,13 +21,19 @@ const Navbar = () => {
         <div className="hidden sm:flex">
           <ul className="hidden sm:flex">
             <Link href="/">
-              <li className="ml-8 capitalize hover:border-b text-xl">Home</li>
+              <li className="ml-8 capitalize border-b-2 border-transparent hover:border-white transition ease-in-out duration-200 text-xl">
+                Home
+              </li>
             </Link>
             <Link href="/settings">
-              <li className="ml-8 capitalize hover:border-b text-xl">Settings</li>
+              <li className="ml-8 capitalize border-b-2 border-transparent hover:border-white transition ease-in-out duration-200 text-xl">
+                Settings
+              </li>
             </Link>
             <div onClick={clientRedirectToLogout} className="cursor-pointer">
-              <li className="mx-8 capitalize hover:border-b text-xl">Log Out</li>
+              <li className="mx-8 capitalize border-b-2 border-transparent hover:border-white transition ease-in-out duration-200 text-xl">
+                Log Out
+              </li>
             </div>
           </ul>
         </div>

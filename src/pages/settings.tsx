@@ -16,18 +16,18 @@ export default function SettingsPage({ tenant }: SettingsPageProps) {
 
   return (
     <section>
-      <div style={{ margin: '0 auto' }}>
+      <div className="my-0 mx-auto">
         <h1 className="text-3xl font-bold underline">Settings</h1>
       </div>
 
-      <div style={{ margin: '2rem auto' }}>
+      <div className="my-8 mx-auto">
         <h3>Who is authenticated?</h3>
         <h4>{user ? `${user.email}` : 'Noboby'}</h4>
       </div>
 
       {isAuthenticated && (
-        <div style={{ margin: '2rem auto' }}>
-          <h3>Tenant Info</h3>
+        <div className="my-8 mx-auto">
+          <h2 className="mb-4 mx-auto font-bold">Server-Side Rendered Page</h2>
           <p>ID: {id}</p>
           <p>Application ID: {applicationId}</p>
           <p>Vanity Domain: {vanityDomain}</p>

@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getSession } from '@/session/iron-session';
+import { middlewareGetSession } from '@/session/iron-session';
 import { refreshTokenIfExpired } from './auth/middleware-auth';
-
-const HTTP_401_STATUS = { status: 401 };
-const UNAUTHORIZED = { statusText: 'Unauthorized' };
+import { HTTP_401_STATUS, UNAUTHORIZED } from '@/utils/constants';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
@@ -18,7 +16,7 @@ export async function middleware(req: NextRequest) {
   const isProtectedPage: boolean = pathname === '/settings';
   const isProtectedApiRoute: boolean = pathname.startsWith('/api/v1');
 
-  const session = await getSession(req, res);
+  const session = await middlewareGetSession(req, res);
   const { expiresAt, isAuthenticated, refreshToken } = session;
 
   // Send users to the login page if they attempt to access protected paths when unauthenticated.
