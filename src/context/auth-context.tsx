@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 
-import { clientRedirectTologin, clientRedirectToLogout } from '@/auth/client-auth';
-import { User } from '@/types';
+import { clientRedirectToLogin, clientRedirectToLogout } from '@/utils/helpers';
+import { User } from '@/types/wristband-types';
 
 type State = { isAuthenticated: boolean; user: User | null; tenantDomainName: string | null };
 const AuthContext = createContext<State>({ isAuthenticated: false, user: null, tenantDomainName: null });
@@ -28,7 +28,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (!isAuthenticated) {
           // We want to preserve the page route that the user lands on when they com back after re-authentication.
-          clientRedirectTologin(window.location.href);
+          clientRedirectToLogin(window.location.href);
           return;
         }
 
