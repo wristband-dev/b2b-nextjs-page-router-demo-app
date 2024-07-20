@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { getSession } from '@/session/iron-session';
 import { SESSION_COOKIE_NAME } from '@/utils/constants';
-import { logout } from '@/auth/server-auth';
+import { wristbandAuth } from '@/wristband-auth';
 
 export default async function logoutRoute(req: NextApiRequest, res: NextApiResponse) {
   const session = await getSession(req, res);
@@ -14,7 +14,7 @@ export default async function logoutRoute(req: NextApiRequest, res: NextApiRespo
 
   try {
     /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
-    await logout(req, res, { tenantDomainName, refreshToken });
+    await wristbandAuth.pageRouter.logout(req, res, { tenantDomainName, refreshToken });
   } catch (error: unknown) {
     console.error(error);
   }

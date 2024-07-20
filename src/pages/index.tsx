@@ -1,7 +1,7 @@
 import { FaExclamationTriangle } from 'react-icons/fa';
 
 import { useAuth } from '@/context/auth-context';
-import { clientRedirectTologin } from '@/auth/client-auth';
+import { clientRedirectToLogin } from '@/utils/helpers';
 
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
@@ -12,7 +12,7 @@ export default function HomePage() {
 
       /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
       if (res.status === 401) {
-        clientRedirectTologin(window.location.href);
+        clientRedirectToLogin(window.location.href);
         return;
       }
 

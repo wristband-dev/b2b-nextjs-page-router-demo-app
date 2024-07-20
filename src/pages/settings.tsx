@@ -3,8 +3,8 @@ import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import * as wristbandService from '@/services/wristband-service';
 import { useAuth } from '@/context/auth-context';
 import { getSession } from '@/session/iron-session';
-import { Tenant } from '@/types';
-import { serverRedirectToLogin } from '@/auth/server-auth';
+import { Tenant } from '@/types/wristband-types';
+import { serverRedirectToLogin } from '@/utils/helpers';
 
 type SettingsPageProps = {
   tenant: Tenant;

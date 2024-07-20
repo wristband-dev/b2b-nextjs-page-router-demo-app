@@ -67,20 +67,3 @@ export type Userinfo = {
   updated_at: string | null;
   roles: Role[];
 };
-
-/**
- * Represents the token response received from the Wristband token endpoint.
- * @typedef {Object} TokenResponse
- * @property {string} access_token - The access token.
- * @property {number} expires_in - The expiration time of the access token (in seconds).
- * @property {string} id_token - The ID token.
- * @property {string} [refresh_token] - The refresh token.
- * @property {string} token_type - The type of token.
- */
-export type TokenResponse = {
-  access_token: string;
-  expires_in: number;
-  id_token: string;
-  refresh_token?: string;
-  token_type: string;
-};
