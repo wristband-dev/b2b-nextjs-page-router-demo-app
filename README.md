@@ -182,6 +182,12 @@ Here are some options which you can use, depending on your operating system:
 
 <br/>
 
+## Wristband NextJS SDK
+
+This demo app is leveraging the [Wristband nextjs-auth SDK](https://github.com/wristband-dev/nextjs-auth) for all authentication interaction in the NextJS server. Refer to that GitHub repository for more information.
+
+<br/>
+
 ## Questions
 
 Reach out to the Wristband team at <support@wristband.dev> for any questions regarding this demo app.
