@@ -17,7 +17,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@wristband/nextjs-auth": "^0.1.0-rc1",
+    "@wristband/nextjs-auth": "^1.0.0-rc1",
     "iron-session": "^8.0.1",
     "next": "^14.2.5",
     "react": "18.2.0",
