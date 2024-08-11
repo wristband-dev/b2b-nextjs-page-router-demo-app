@@ -9,6 +9,7 @@ type SessionData = {
   expiresAt: number;
   isAuthenticated: boolean;
   refreshToken?: string;
+  tenantCustomDomain?: string;
   tenantDomainName: string;
   user: User;
 };

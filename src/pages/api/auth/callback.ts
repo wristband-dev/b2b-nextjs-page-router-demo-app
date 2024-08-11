@@ -4,18 +4,17 @@ import { getSession } from '@/session/iron-session';
 import { parseUserinfo } from '@/utils/helpers';
 import { INVOTASTIC_HOST, IS_LOCALHOST } from '@/utils/constants';
 import { wristbandAuth } from '@/wristband-auth';
-import { CallbackResultType } from '@wristband/nextjs-auth';
+import { CallbackResultType, PageRouterCallbackResult } from '@wristband/nextjs-auth';
 import { Userinfo } from '@/types/wristband-types';
 
 export default async function handleCallback(req: NextApiRequest, res: NextApiResponse) {
   try {
     /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
     // After the user authenticates, exchange the incoming authorization code for JWTs and also retrieve userinfo.
-    const callbackResult = await wristbandAuth.pageRouter.callback(req, res);
-    const { callbackData, redirectUrl, result } = callbackResult;
+    const callbackResult: PageRouterCallbackResult = await wristbandAuth.pageRouter.callback(req, res);
+    const { callbackData, result } = callbackResult;
 
     if (result === CallbackResultType.REDIRECT_REQUIRED) {
-      res.redirect(redirectUrl!);
       return;
     }
 
@@ -28,6 +27,7 @@ export default async function handleCallback(req: NextApiRequest, res: NextApiRe
     session.refreshToken = callbackData!.refreshToken;
     session.user = parseUserinfo(callbackData!.userinfo as Userinfo);
     session.tenantDomainName = callbackData!.tenantDomainName;
+    session.tenantCustomDomain = callbackData!.tenantCustomDomain || undefined;
 
     await session.save();
 

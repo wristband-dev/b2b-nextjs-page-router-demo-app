@@ -6,7 +6,7 @@ import { wristbandAuth } from '@/wristband-auth';
 
 export default async function logoutRoute(req: NextApiRequest, res: NextApiResponse) {
   const session = await getSession(req, res);
-  const { tenantDomainName, refreshToken } = session;
+  const { refreshToken, tenantCustomDomain, tenantDomainName } = session;
 
   // Always destroy session.
   res.setHeader('Set-Cookie', `${SESSION_COOKIE_NAME}=; Max-Age=0; Path=/`);
@@ -14,7 +14,7 @@ export default async function logoutRoute(req: NextApiRequest, res: NextApiRespo
 
   try {
     /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
-    await wristbandAuth.pageRouter.logout(req, res, { tenantDomainName, refreshToken });
+    await wristbandAuth.pageRouter.logout(req, res, { refreshToken, tenantCustomDomain, tenantDomainName });
   } catch (error: unknown) {
     console.error(error);
   }
