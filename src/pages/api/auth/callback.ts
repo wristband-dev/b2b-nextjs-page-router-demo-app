@@ -6,6 +6,7 @@ import { INVOTASTIC_HOST, IS_LOCALHOST } from '@/utils/constants';
 import { wristbandAuth } from '@/wristband-auth';
 import { CallbackResultType, PageRouterCallbackResult } from '@wristband/nextjs-auth';
 import { Userinfo } from '@/types/wristband-types';
+import { createCsrfSecret, setCsrfTokenCookie } from '@/utils/csrf';
 
 export default async function handleCallback(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -29,6 +30,12 @@ export default async function handleCallback(req: NextApiRequest, res: NextApiRe
     session.tenantDomainName = callbackData!.tenantDomainName;
     session.tenantCustomDomain = callbackData!.tenantCustomDomain || undefined;
 
+    // Establish CSRF secret and cookie.
+    const csrfSecret = createCsrfSecret();
+    session.csrfSecret = csrfSecret;
+    await setCsrfTokenCookie(csrfSecret, res);
+
+    // Save all fields into the session
     await session.save();
 
     // Send the user back to the Invotastic application.

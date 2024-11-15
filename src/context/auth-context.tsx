@@ -1,13 +1,20 @@
 import React, { createContext, useEffect, useState } from 'react';
 
-import { clientRedirectToLogin, clientRedirectToLogout } from '@/utils/helpers';
+import { clientRedirectToLogin, clientRedirectToLogout, isUnauthorizedError } from '@/utils/helpers';
 import { User } from '@/types/wristband-types';
+import frontendApiService from '@/services/frontend-api-service';
 
-type State = { isAuthenticated: boolean; user: User | null; tenantDomainName: string | null };
-const AuthContext = createContext<State>({ isAuthenticated: false, user: null, tenantDomainName: null });
+type State = { isAuthenticated: boolean; isLoading: boolean; user: User | null; tenantDomainName: string | null };
+const AuthContext = createContext<State>({
+  isAuthenticated: false,
+  isLoading: true,
+  user: null,
+  tenantDomainName: null,
+});
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [tenantDomainName, setTenantDomainName] = useState<string | null>(null);
 
@@ -16,35 +23,33 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     const fetchSession = async () => {
       try {
         /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
-        const res = await fetch(`/api/auth/session`, { cache: 'no-store', method: 'GET' });
+        const sessionData = await frontendApiService.getSession();
+        const { user, tenantDomainName } = sessionData;
 
-        if (res.status !== 200) {
-          clientRedirectToLogout();
-          return;
-        }
-
-        const data = await res.json();
-        const { isAuthenticated, user, tenantDomainName } = data;
-
-        if (!isAuthenticated) {
-          // We want to preserve the page route that the user lands on when they com back after re-authentication.
-          clientRedirectToLogin(window.location.href);
-          return;
-        }
-
+        setIsLoading(false);
         setIsAuthenticated(true);
         setUser(user);
         setTenantDomainName(tenantDomainName);
       } catch (error) {
         console.log(error);
-        clientRedirectToLogout();
+
+        if (isUnauthorizedError(error)) {
+          // We want to preserve the page route that the user lands on when they come back after re-authentication.
+          clientRedirectToLogin(window.location.href);
+        } else {
+          clientRedirectToLogout();
+        }
       }
     };
 
     fetchSession();
   }, []);
 
-  return <AuthContext.Provider value={{ isAuthenticated, user, tenantDomainName }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, tenantDomainName }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 function useAuth() {

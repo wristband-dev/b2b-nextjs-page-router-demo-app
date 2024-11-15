@@ -6,6 +6,7 @@ import { User } from '@/types/wristband-types';
 
 type SessionData = {
   accessToken: string;
+  csrfSecret: string;
   expiresAt: number;
   isAuthenticated: boolean;
   refreshToken?: string;
@@ -26,13 +27,6 @@ const sessionOptions: SessionOptions = {
     secure: false,
   },
 };
-
-export function middlewareGetSession(
-  req: http.IncomingMessage | Request,
-  res: http.ServerResponse | Response
-): Promise<IronSession<SessionData>> {
-  return getSession(req, res);
-}
 
 export function getSession(
   req: http.IncomingMessage | Request,

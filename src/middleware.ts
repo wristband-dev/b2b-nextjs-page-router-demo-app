@@ -1,32 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { middlewareGetSession } from '@/session/iron-session';
 import { wristbandAuth } from '@/wristband-auth';
+import { getSession } from '@/session/iron-session';
 import { HTTP_401_STATUS, UNAUTHORIZED } from '@/utils/constants';
+import { isCsrfTokenValid, setCsrfTokenCookie } from '@/utils/csrf';
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+// NOTE: Replace with whatever path matching algorithm your app needs.
+const PROTECTED_API_PATH_PREFIX = '/api/v1';
+const PROTECTED_PAGE_PATHS = ['/settings'];
+
+function resolveErrorResponse(req: NextRequest) {
   const host = req.headers.get('host');
   const { pathname } = req.nextUrl;
-
-  // Path matching here is crude -- replace with whatever matching algorithm your app needs.
-  const isProtectedPage: boolean = pathname === '/settings';
-  const isProtectedApiRoute: boolean = pathname.startsWith('/api/v1');
-
-  // Simply return if the path is not meant to be protected
-  if (!isProtectedPage && !isProtectedApiRoute) {
-    return res;
-  }
-
-  const session = await middlewareGetSession(req, res);
-  const { expiresAt, isAuthenticated, refreshToken } = session;
 
   const returnUrl = `http://${host}${pathname}`;
   const loginUrl = `http://${host}/api/auth/login?return_url=${returnUrl}`;
 
+  return pathname.startsWith(PROTECTED_API_PATH_PREFIX)
+    ? NextResponse.json(UNAUTHORIZED, HTTP_401_STATUS)
+    : NextResponse.redirect(loginUrl);
+}
+
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next();
+  const { pathname } = req.nextUrl;
+
+  // Simply exit the middleware if the current request path does not need to be protected.
+  if (!PROTECTED_PAGE_PATHS.includes(pathname) && !pathname.startsWith(PROTECTED_API_PATH_PREFIX)) {
+    return res;
+  }
+
+  const session = await getSession(req, res);
+  const { csrfSecret, expiresAt, isAuthenticated, refreshToken } = session;
+
   // Send users to the login page if they attempt to access protected paths when unauthenticated.
   if (!isAuthenticated) {
-    return isProtectedApiRoute ? NextResponse.json(UNAUTHORIZED, HTTP_401_STATUS) : NextResponse.redirect(loginUrl);
+    return resolveErrorResponse(req);
+  }
+
+  // Ensure that CSRF valid.
+  const isValidCsrf = await isCsrfTokenValid(req, csrfSecret);
+  if (!isValidCsrf && pathname.startsWith(PROTECTED_API_PATH_PREFIX)) {
+    return resolveErrorResponse(req);
   }
 
   // Always verify the refresh token is not expired and touch the session timestamp for any protected paths.
@@ -39,12 +54,16 @@ export async function middleware(req: NextRequest) {
       session.accessToken = tokenData.accessToken;
       session.refreshToken = tokenData.refreshToken;
     }
-    // Save and/or touch the session.
-    await session.save();
   } catch (error) {
     console.log(`Token refresh failed: `, error);
-    return isProtectedApiRoute ? NextResponse.json(UNAUTHORIZED, HTTP_401_STATUS) : NextResponse.redirect(loginUrl);
+    return resolveErrorResponse(req);
   }
+
+  // Always touch the session by saving it to update the expiration
+  await session.save();
+
+  // Update CSRF Token
+  await setCsrfTokenCookie(csrfSecret, res);
 
   return res;
 }
