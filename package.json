@@ -9,8 +9,8 @@
     "npm": ">=8.19.2"
   },
   "scripts": {
-    "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 next dev -p 6001",
-    "dev-vanity-domain": "NODE_TLS_REJECT_UNAUTHORIZED=0 next dev -p 6001 -H business.invotastic.com",
+    "dev": "next dev -p 6001",
+    "dev-vanity-domain": "next dev -p 6001 -H business.invotastic.com",
     "build": "next build",
     "start": "next start -p 6001",
     "start-vanity-domain": "next start -p 6001 -H business.invotastic.com",
