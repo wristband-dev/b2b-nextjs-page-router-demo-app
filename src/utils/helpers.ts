@@ -1,11 +1,7 @@
+import { AxiosError } from 'axios';
 import { IncomingMessage } from 'http';
 
 import { Userinfo } from '@/types/wristband-types';
-
-/*
- * These are auth functions that can be invoked to redirect to Wristband for logging in and logging out
- * of the application.
- */
 
 export function clientRedirectToLogin(returnUrl?: string) {
   if (!!window) {
@@ -57,4 +53,16 @@ export function parseUserinfo(userinfo: Userinfo) {
     updatedAt: userinfo.updated_at,
     roles: userinfo.roles,
   };
+}
+
+export function isUnauthorizedError(error: unknown) {
+  if (!error) {
+    return false;
+  }
+
+  if (error instanceof AxiosError) {
+    return error.response?.status === 401;
+  }
+
+  return false;
 }

@@ -17,8 +17,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@wristband/nextjs-auth": "^1.0.0-rc1",
-    "iron-session": "^8.0.3",
+    "@edge-csrf/core": "^2.5.2",
+    "@wristband/nextjs-auth": "^1.0.0-rc2",
+    "axios": "^1.7.7",
+    "iron-session": "^8.0.4",
     "next": "^14.2.17",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
