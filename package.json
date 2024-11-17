@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@edge-csrf/core": "^2.5.2",
-    "@wristband/nextjs-auth": "^1.0.0-rc2",
+    "@wristband/nextjs-auth": "^1.0.0-rc4",
     "axios": "^1.7.7",
     "iron-session": "^8.0.4",
     "next": "^14.2.17",
