@@ -1,4 +1,4 @@
-import { ServerResponse } from 'http';
+import { NextApiResponse } from 'next';
 import { NextRequest } from 'next/server';
 import { atou, createSecret, createToken, utoa, verifyToken } from '@edge-csrf/core';
 
@@ -18,7 +18,7 @@ export async function isCsrfTokenValid(req: NextRequest, csrfSecret: string): Pr
   return isVerified;
 }
 
-export async function setCsrfTokenCookie(csrfSecret: string, res: Response | ServerResponse) {
+export async function setCsrfTokenCookie(csrfSecret: string, res: Response | NextApiResponse) {
   const csrfToken = await createToken(atou(csrfSecret), 8);
   const isSecure = process.env.PUBLIC_DEMO === 'ENABLED';
 
@@ -27,7 +27,7 @@ export async function setCsrfTokenCookie(csrfSecret: string, res: Response | Ser
   if (res instanceof Response) {
     // For Edge runtime, append the cookie header using Response's headers.
     res.headers.append('Set-Cookie', cookieValue);
-  } else if (res instanceof ServerResponse) {
+  } else if ('setHeader' in res) {
     // For Node runtime, handle cookies with ServerResponse.
     let existingCookies = res.getHeader('Set-Cookie') || [];
 

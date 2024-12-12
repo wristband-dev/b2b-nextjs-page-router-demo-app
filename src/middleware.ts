@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { wristbandAuth } from '@/wristband-auth';
-import { getSession } from '@/session/iron-session';
+import { middlewareGetSession } from '@/session/iron-session';
 import { HTTP_401_STATUS, UNAUTHORIZED } from '@/utils/constants';
 import { isCsrfTokenValid, setCsrfTokenCookie } from '@/utils/csrf';
 
@@ -30,7 +30,7 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
-  const session = await getSession(req, res);
+  const session = await middlewareGetSession(req, res);
   const { csrfSecret, expiresAt, isAuthenticated, refreshToken } = session;
 
   // Send users to the login page if they attempt to access protected paths when unauthenticated.
