@@ -28,9 +28,10 @@ const sessionOptions: SessionOptions = {
   },
 };
 
-export function getSession(
-  req: http.IncomingMessage | Request,
-  res: http.ServerResponse | Response
-): Promise<IronSession<SessionData>> {
+export async function middlewareGetSession(req: Request, res: Response): Promise<IronSession<SessionData>> {
+  return await getIronSession<SessionData>(req, res, sessionOptions);
+}
+
+export function getSession(req: http.IncomingMessage, res: http.ServerResponse): Promise<IronSession<SessionData>> {
   return getIronSession(req, res, sessionOptions);
 }
