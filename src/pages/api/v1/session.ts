@@ -8,12 +8,8 @@ export default async function sessionRoute(req: NextApiRequest, res: NextApiResp
   }
 
   const session = await getSession(req, res);
-  const { isAuthenticated, tenantDomainName, user } = session;
+  const { user } = session;
+  const { email, tenantId } = user;
 
-  /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
-  if (!isAuthenticated) {
-    return res.status(401).end();
-  }
-
-  res.status(200).json({ user, tenantDomainName });
+  res.status(200).json({ userId: undefined, tenantId, metadata: { email } });
 }
