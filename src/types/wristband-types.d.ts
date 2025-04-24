@@ -67,3 +67,7 @@ export type Userinfo = {
   updated_at: string | null;
   roles: Role[];
 };
+
+export type MySessionMetadata = {
+  email: string;
+};

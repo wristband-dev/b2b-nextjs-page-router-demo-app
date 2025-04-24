@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
 
 import Logo from '../../public/Logo.png';
-import { clientRedirectToLogout } from '@/utils/helpers';
+import { redirectToLogout } from '@wristband/react-client-auth';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
@@ -30,7 +30,7 @@ const Navbar = () => {
                 Settings
               </li>
             </Link>
-            <div onClick={clientRedirectToLogout} className="cursor-pointer">
+            <div onClick={() => redirectToLogout('/api/auth/logout')} className="cursor-pointer">
               <li className="mx-8 capitalize border-b-2 border-transparent hover:border-white transition ease-in-out duration-200 text-xl">
                 Log Out
               </li>
@@ -65,7 +65,7 @@ const Navbar = () => {
                 Settings
               </li>
             </Link>
-            <div onClick={clientRedirectToLogout} className="cursor-pointer">
+            <div onClick={() => redirectToLogout('/api/auth/logout')} className="cursor-pointer">
               <li onClick={() => setMenuOpen(false)} className="py-4 cursor-pointer">
                 Log Out
               </li>

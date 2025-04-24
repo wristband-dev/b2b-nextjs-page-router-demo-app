@@ -1,11 +1,12 @@
 import { FaExclamationTriangle } from 'react-icons/fa';
 
-import { useAuth } from '@/context/auth-context';
-import { clientRedirectToLogin, isUnauthorizedError } from '@/utils/helpers';
+import { isUnauthorizedError } from '@/utils/helpers';
 import frontendApiService from '@/services/frontend-api-service';
+import { redirectToLogin, useWristbandAuth } from '@wristband/react-client-auth';
 
 export default function HomePage() {
-  const { isAuthenticated } = useAuth();
+  /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
+  const { isAuthenticated, isLoading } = useWristbandAuth();
 
   const sayHello = async () => {
     try {
@@ -16,7 +17,7 @@ export default function HomePage() {
 
       /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
       if (isUnauthorizedError(error)) {
-        clientRedirectToLogin(window.location.href);
+        redirectToLogin('/api/auth/login', { returnUrl: encodeURI(window.location.href) });
         return;
       }
 
@@ -38,7 +39,7 @@ export default function HomePage() {
       </div>
 
       <div className="my-8 mx-auto">
-        {!isAuthenticated && <h3>Loading...</h3>}
+        {isLoading && <h3>Loading...</h3>}
         {isAuthenticated && (
           <>
             <h2 className="mb-4 font-bold">Client-side API Route Call</h2>

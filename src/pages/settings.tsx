@@ -1,9 +1,9 @@
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+import { useWristbandAuth, useWristbandSession } from '@wristband/react-client-auth';
 
 import * as wristbandService from '@/services/wristband-service';
-import { useAuth } from '@/context/auth-context';
 import { getSession } from '@/session/iron-session';
-import { Tenant } from '@/types/wristband-types';
+import { MySessionMetadata, Tenant } from '@/types/wristband-types';
 import { serverRedirectToLogin } from '@/utils/helpers';
 
 type SettingsPageProps = {
@@ -11,7 +11,10 @@ type SettingsPageProps = {
 };
 
 export default function SettingsPage({ tenant }: SettingsPageProps) {
-  const { isAuthenticated, user } = useAuth();
+  /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
+  const { isAuthenticated } = useWristbandAuth();
+  const { metadata } = useWristbandSession<MySessionMetadata>();
+  const { email } = metadata;
   const { id, applicationId, vanityDomain, domainName, displayName, description, signupEnabled, status } = tenant;
 
   return (
@@ -22,7 +25,7 @@ export default function SettingsPage({ tenant }: SettingsPageProps) {
 
       <div className="my-8 mx-auto">
         <h3>Who is authenticated?</h3>
-        <h4>{user ? `${user.email}` : 'Noboby'}</h4>
+        <h4>{email ?? 'Noboby'}</h4>
       </div>
 
       {isAuthenticated && (
