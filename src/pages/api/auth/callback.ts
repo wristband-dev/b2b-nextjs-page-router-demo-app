@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { getSession } from '@/session/iron-session';
 import { parseUserinfo } from '@/utils/helpers';
-import { INVOTASTIC_HOST, IS_LOCALHOST } from '@/utils/constants';
+import { INVOTASTIC_HOST } from '@/utils/constants';
 import { wristbandAuth } from '@/wristband-auth';
 import { CallbackResultType, PageRouterCallbackResult } from '@wristband/nextjs-auth';
 import { Userinfo } from '@/types/wristband-types';
@@ -39,8 +39,7 @@ export default async function handleCallback(req: NextApiRequest, res: NextApiRe
     await session.save();
 
     // Send the user back to the Invotastic application.
-    const tenantDomain = IS_LOCALHOST ? '' : `${callbackData!.tenantDomainName}.`;
-    res.redirect(callbackData!.returnUrl || `http://${tenantDomain}${INVOTASTIC_HOST}`);
+    res.redirect(callbackData!.returnUrl || `http://${INVOTASTIC_HOST}`);
   } catch (error: unknown) {
     console.error(error);
   }
