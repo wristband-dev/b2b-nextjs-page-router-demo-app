@@ -6,7 +6,8 @@ export default async function handleLogin(req: NextApiRequest, res: NextApiRespo
   try {
     /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
     // Redirect out to the Wristband authorize endpoint to start the login process via OAuth2/OIDC Auth Code flow.
-    await wristbandAuth.pageRouter.login(req, res);
+    const authorizeUrl = await wristbandAuth.pageRouter.login(req, res);
+    res.redirect(authorizeUrl);
   } catch (error) {
     console.error(error);
   }

@@ -15,7 +15,12 @@ export default async function logoutRoute(req: NextApiRequest, res: NextApiRespo
 
   try {
     /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
-    await wristbandAuth.pageRouter.logout(req, res, { refreshToken, tenantCustomDomain, tenantDomainName });
+    const logoutUrl = await wristbandAuth.pageRouter.logout(req, res, {
+      refreshToken,
+      tenantCustomDomain,
+      tenantDomainName,
+    });
+    res.redirect(logoutUrl);
   } catch (error: unknown) {
     console.error(error);
   }
