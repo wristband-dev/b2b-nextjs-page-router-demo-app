@@ -13,5 +13,5 @@ export const wristbandAuth = createWristbandAuth({
   scopes: ['openid', 'offline_access', 'profile', 'email', 'roles'],
   useCustomDomains: false,
   useTenantSubdomains: false,
-  wristbandApplicationDomain: process.env.APPLICATION_VANITY_DOMAIN!,
+  wristbandApplicationVanityDomain: process.env.APPLICATION_VANITY_DOMAIN!,
 });

@@ -4,7 +4,7 @@ import { getSession } from '@/session/iron-session';
 import { parseUserinfo } from '@/utils/helpers';
 import { INVOTASTIC_HOST } from '@/utils/constants';
 import { wristbandAuth } from '@/wristband-auth';
-import { CallbackResultType, PageRouterCallbackResult } from '@wristband/nextjs-auth';
+import { CallbackResultType, CallbackResult } from '@wristband/nextjs-auth';
 import { Userinfo } from '@/types/wristband-types';
 import { createCsrfSecret, setCsrfTokenCookie } from '@/utils/csrf';
 
@@ -12,11 +12,11 @@ export default async function handleCallback(req: NextApiRequest, res: NextApiRe
   try {
     /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
     // After the user authenticates, exchange the incoming authorization code for JWTs and also retrieve userinfo.
-    const callbackResult: PageRouterCallbackResult = await wristbandAuth.pageRouter.callback(req, res);
-    const { callbackData, result } = callbackResult;
+    const callbackResult: CallbackResult = await wristbandAuth.pageRouter.callback(req, res);
+    const { callbackData, redirectUrl, type } = callbackResult;
 
-    if (result === CallbackResultType.REDIRECT_REQUIRED) {
-      return;
+    if (type === CallbackResultType.REDIRECT_REQUIRED) {
+      return res.redirect(redirectUrl!);
     }
 
     // Save any necessary fields for the user's app session into a session cookie.
@@ -39,7 +39,7 @@ export default async function handleCallback(req: NextApiRequest, res: NextApiRe
     await session.save();
 
     // Send the user back to the Invotastic application.
-    res.redirect(callbackData!.returnUrl || `http://${INVOTASTIC_HOST}`);
+    return res.redirect(callbackData!.returnUrl || `http://${INVOTASTIC_HOST}`);
   } catch (error: unknown) {
     console.error(error);
   }
