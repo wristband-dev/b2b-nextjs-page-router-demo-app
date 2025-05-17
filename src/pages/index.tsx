@@ -1,6 +1,6 @@
 import { FaExclamationTriangle } from 'react-icons/fa';
 
-import { isUnauthorizedError } from '@/utils/helpers';
+import { isForbiddenError, isUnauthorizedError } from '@/utils/helpers';
 import frontendApiService from '@/services/frontend-api-service';
 import { redirectToLogin, useWristbandAuth } from '@wristband/react-client-auth';
 
@@ -16,7 +16,7 @@ export default function HomePage() {
       console.log(error);
 
       /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
-      if (isUnauthorizedError(error)) {
+      if (isUnauthorizedError(error) || isForbiddenError(error)) {
         redirectToLogin('/api/auth/login', { returnUrl: encodeURI(window.location.href) });
         return;
       }

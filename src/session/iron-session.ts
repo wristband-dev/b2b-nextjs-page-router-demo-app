@@ -6,7 +6,7 @@ import { User } from '@/types/wristband-types';
 
 type SessionData = {
   accessToken: string;
-  csrfSecret: string;
+  csrfToken: string;
   expiresAt: number;
   isAuthenticated: boolean;
   refreshToken?: string;
