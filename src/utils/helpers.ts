@@ -49,3 +49,15 @@ export function isUnauthorizedError(error: unknown) {
 
   return false;
 }
+
+export function isForbiddenError(error: unknown) {
+  if (!error) {
+    return false;
+  }
+
+  if (error instanceof AxiosError) {
+    return error.response?.status === 403;
+  }
+
+  return false;
+}
