@@ -72,9 +72,6 @@ export async function middleware(req: NextRequest) {
   // Always "touch" the session by saving it to update the expiration
   await session.save();
 
-  // Update CSRF Token
-  await updateCsrfCookie(csrfToken, res);
-
   return res;
 }
 
