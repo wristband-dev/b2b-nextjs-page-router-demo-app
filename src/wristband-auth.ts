@@ -11,7 +11,6 @@ export const wristbandAuth = createWristbandAuth({
   loginUrl: `http://${INVOTASTIC_HOST}/api/auth/login`,
   redirectUri: `http://${INVOTASTIC_HOST}/api/auth/callback`,
   scopes: ['openid', 'offline_access', 'profile', 'email', 'roles'],
-  useCustomDomains: false,
-  useTenantSubdomains: false,
+  isApplicationCustomDomainActive: false,
   wristbandApplicationVanityDomain: process.env.APPLICATION_VANITY_DOMAIN!,
 });
